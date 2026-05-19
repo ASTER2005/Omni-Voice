@@ -1,0 +1,91 @@
+# ═══════════════════════════════════════════════════════════════
+#  OmniVoice Pipeline Configuration
+# ═══════════════════════════════════════════════════════════════
+
+# ── Dataset ────────────────────────────────────────────────────
+dataset:
+  name: librispeech
+  root: "C:/Users/ankan/Downloads/LibriSpeech_dataset"
+  train_split: train-clean-360        # 921 speakers, 360h
+  dev_split:   dev-clean              # 40 speakers,  5.4h
+  test_split:  test-clean             # 40 speakers,  5.4h (imposter eval)
+  processed_dir: "C:/Omni_Voice/data/processed"
+
+# ── Audio Capture (live mic) ───────────────────────────────────
+audio:
+  sample_rate: 16000                  # Hz — matches LibriSpeech
+  channels: 1                         # mono
+  chunk_duration_ms: 30               # ms per audio chunk
+  dtype: float32
+  bandpass_low_hz: 300
+  bandpass_high_hz: 3400
+
+# ── Voice Activity Detection ───────────────────────────────────
+vad:
+  model: silero                       # silero-vad
+  threshold: 0.5                      # speech probability cutoff
+  min_speech_duration_ms: 250
+  min_silence_duration_ms: 100
+  window_size_samples: 512
+
+# ── Wake Word Detection ────────────────────────────────────────
+wake_word:
+  target_words:
+    - "omni"                          # Change after forced-alignment scan
+  model_path:   "C:/Omni_Voice/models/wake_word.pth"
+  onnx_path:    "C:/Omni_Voice/models/wake_word_int8.onnx"
+  threshold:    0.85                  # softmax confidence cutoff
+  input_duration_s: 1.0              # 1-second window
+  n_mels: 64
+  hop_length: 160                     # 10ms at 16kHz
+  win_length: 400                     # 25ms at 16kHz
+  n_fft: 512
+
+# ── Speaker Verification ───────────────────────────────────────
+speaker_verification:
+  model_backend: ecapa                # "ecapa" = SpeechBrain pretrained (best) | "resnet18" = custom
+  model_path:    "C:/Omni_Voice/models/speaker_ecapa.pth"
+  onnx_path:     "C:/Omni_Voice/models/speaker_ecapa.onnx"
+  enrolled_dir:  "C:/Omni_Voice/enrolled_speakers"
+  embedding_dim: 192
+  threshold:     0.25                 # ECAPA-TDNN cosine threshold (lower than ResNet-18)
+  enroll_utterances: 7
+  enroll_duration_s: 4.0
+  n_mels: 80
+  hop_length: 160
+  win_length: 400
+  n_fft: 512
+
+# ── Training — Wake Word ───────────────────────────────────────
+train_wake_word:
+  epochs: 50
+  batch_size: 128
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  label_smoothing: 0.1
+  negative_ratio: 10                  # negatives per positive sample
+  augment:
+    specaugment: true
+    time_mask_max: 30
+    freq_mask_max: 20
+    speed_perturb: true
+    speed_range: [0.9, 1.1]
+    noise_snr_range: [5, 20]
+  checkpoint_dir: "C:/Omni_Voice/checkpoints/wake_word"
+
+# ── Training — Speaker Verification ───────────────────────────
+train_speaker:
+  epochs: 30
+  batch_size: 32
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  arcface_margin: 0.5
+  arcface_scale: 64
+  utterances_per_speaker: 5          # keep 5 utterances/speaker (was 20 → 4× faster)
+  checkpoint_dir: "C:/Omni_Voice/checkpoints/speaker"
+
+# ── Logging ────────────────────────────────────────────────────
+logging:
+  speaker_events_log: "C:/Omni_Voice/logs/speaker_events.log"
+  pipeline_log:       "C:/Omni_Voice/logs/pipeline.log"
+  level: INFO
