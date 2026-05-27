@@ -77,8 +77,8 @@ train_wake_word:
 train_speaker:
   epochs: 30
   batch_size: 32
-  lr: 1.0e-3
-  weight_decay: 1.0e-4
+  lr: 3.0e-4
+  weight_decay: 1.0e-3
   arcface_margin: 0.5
   arcface_scale: 64
   utterances_per_speaker: 5          # keep 5 utterances/speaker (was 20 → 4× faster)

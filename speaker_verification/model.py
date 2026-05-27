@@ -59,7 +59,7 @@ class ArcFaceHead(nn.Module):
         if labels is None:
             return cosine * self.scale   # inference mode
 
-        sine = torch.sqrt(1.0 - torch.clamp(cosine ** 2, 0, 1))
+        sine = torch.sqrt(1.0 - torch.clamp(cosine ** 2, 0, 1) + 1e-7)
         phi  = cosine * self.cos_m - sine * self.sin_m
         phi  = torch.where(cosine > self.th, phi, cosine - self.mm)
 
@@ -102,45 +102,127 @@ class ECAPASpeakerModel(nn.Module):
         return self.encode(waveform)
 
 
+class BasicBlock(nn.Module):
+    expansion = 1
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        stride: int = 1,
+        downsample: nn.Module | None = None,
+    ):
+        super().__init__()
+        self.conv1 = nn.Conv2d(
+            in_channels,
+            out_channels,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            bias=False,
+        )
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(
+            out_channels,
+            out_channels,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False,
+        )
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.downsample = downsample
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        identity = x
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
+        if self.downsample is not None:
+            identity = self.downsample(x)
+        out += identity
+        out = self.relu(out)
+        return out
+
+
 # ═══════════════════════════════════════════════════════════════
 #  Track B — ResNet-18 Speaker Encoder (custom, from scratch)
 # ═══════════════════════════════════════════════════════════════
 class ResNet18SpeakerEncoder(nn.Module):
     """
-    Modified ResNet-18 for speaker embedding from 80-band Mel spectrograms.
+    Modified lightweight ResNet-18 for speaker embedding from 80-band Mel spectrograms.
 
     Input:  [B, 1, 80, T]
-    Output: [B, 512] L2-normalised embedding
+    Output: [B, embedding_dim] L2-normalised embedding
     """
 
     def __init__(self, embedding_dim: int = 512):
         super().__init__()
         self.embedding_dim = embedding_dim
-        base = resnet18(weights=None)
 
-        # Modify input conv: 1 input channel instead of 3
-        base.conv1 = nn.Conv2d(
-            1, 64,
-            kernel_size=(7, 7),
-            stride=(2, 2),
-            padding=(3, 3),
+        # Custom lightweight channels to massively reduce overfitting: 32, 64, 128, 128
+        self.in_channels = 32
+
+        self.conv1 = nn.Conv2d(
+            1, 32,
+            kernel_size=7,
+            stride=2,
+            padding=3,
             bias=False,
         )
+        self.bn1 = nn.BatchNorm2d(32)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        # Remove original FC
-        self.backbone = nn.Sequential(
-            base.conv1, base.bn1, base.relu, base.maxpool,
-            base.layer1, base.layer2, base.layer3, base.layer4,
-        )
+        # 4 Residual layers with lightweight width
+        self.layer1 = self._make_layer(BasicBlock, 32, 2, stride=1)
+        self.layer2 = self._make_layer(BasicBlock, 64, 2, stride=2)
+        self.layer3 = self._make_layer(BasicBlock, 128, 2, stride=2)
+        self.layer4 = self._make_layer(BasicBlock, 128, 2, stride=2)
 
         # Global stats pooling (mean + std concatenated)
         self.stats_pool = _StatsPool()
 
-        # Embedding projection
+        # Regularized embedding projection with ReLU and Dropout(p=0.4)
         self.embedding = nn.Sequential(
-            nn.Linear(512 * 2, embedding_dim),
+            nn.Linear(128 * 2 * BasicBlock.expansion, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.4),
+            nn.Linear(256, embedding_dim),
             nn.BatchNorm1d(embedding_dim),
         )
+
+    def _make_layer(
+        self,
+        block: type[BasicBlock],
+        out_channels: int,
+        blocks: int,
+        stride: int = 1,
+    ) -> nn.Sequential:
+        downsample = None
+        if stride != 1 or self.in_channels != out_channels * block.expansion:
+            downsample = nn.Sequential(
+                nn.Conv2d(
+                    self.in_channels,
+                    out_channels * block.expansion,
+                    kernel_size=1,
+                    stride=stride,
+                    bias=False,
+                ),
+                nn.BatchNorm2d(out_channels * block.expansion),
+            )
+
+        layers = []
+        layers.append(block(self.in_channels, out_channels, stride, downsample))
+        self.in_channels = out_channels * block.expansion
+        for _ in range(1, blocks):
+            layers.append(block(self.in_channels, out_channels))
+
+        return nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -149,15 +231,25 @@ class ResNet18SpeakerEncoder(nn.Module):
         Returns:
             embeddings: [B, embedding_dim] L2-normalised
         """
-        feat = self.backbone(x)                  # [B, 512, H', T']
-        feat = feat.permute(0, 2, 3, 1)          # [B, H', T', 512]
-        feat = feat.reshape(feat.size(0), -1, 512)  # [B, H'*T', 512]
-        feat = self.stats_pool(feat)              # [B, 1024]
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        feat = x.permute(0, 2, 3, 1)          # [B, H', T', 128]
+        feat = feat.reshape(feat.size(0), -1, 128)  # [B, H'*T', 128]
+        feat = self.stats_pool(feat)              # [B, 256]
         emb  = self.embedding(feat)              # [B, embedding_dim]
         return F.normalize(emb, dim=1)
 
     def count_parameters(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
 
 
 class _StatsPool(nn.Module):

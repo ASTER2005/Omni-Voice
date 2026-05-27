@@ -62,5 +62,5 @@ if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
     p.add_argument("--config", default="C:/Omni_Voice/pipeline/config.yaml")
-    export(cfg_path=argparse.ArgumentParser().parse_args().config
-           if len(sys.argv) > 1 else "C:/Omni_Voice/pipeline/config.yaml")
+    args = p.parse_args()
+    export(cfg_path=args.config)
