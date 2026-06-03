@@ -65,6 +65,8 @@ class SileroVAD:
         Returns:
             (is_speech: bool, probability: float)
         """
+        if len(chunk) < self.window_size:
+            chunk = np.pad(chunk, (0, self.window_size - len(chunk)))
         tensor = torch.from_numpy(chunk).float().unsqueeze(0)  # [1, N]
         with torch.no_grad():
             prob = self._model(tensor, self.sample_rate).item()

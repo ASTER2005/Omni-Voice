@@ -1,0 +1,8 @@
+2026-06-03 10:21:04,282 [INFO] Loading wake word ONNX: C:/Omni_Voice/models/wake_word_int8.onnx
+2026-06-03 10:21:04,298 [INFO] =======================================================
+2026-06-03 10:21:04,298 [INFO]   OmniVoice Pipeline STARTED
+2026-06-03 10:21:04,298 [INFO]   Wake word: ['omni']
+2026-06-03 10:21:04,298 [INFO]   Enrolled speakers: ['Ankan']
+2026-06-03 10:21:04,299 [INFO] =======================================================
+2026-06-03 10:25:00,954 [INFO] Pipeline stopped by user (Ctrl+C).
+2026-06-03 10:25:00,954 [INFO] OmniVoice Pipeline STOPPED.

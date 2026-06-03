@@ -1,0 +1,9 @@
+Stage,Latency_ms,Target
+VAD (silero-vad),0.2837880002334714,≤ 5 ms
+Bandpass filter (scipy),0.4390749998856336,—
+Spectral gate (noisereduce),20.736747999908403,—
+Noise reduction (full),20.524168999982066,—
+"Log-Mel (64-band, 1s)",1.7216720001306385,—
+"Mel filterbank (80-band, 4s)",2.795981999952346,—
+Wake Word ONNX (INT8),0.26293850038200617,≤ 10 ms
+Speaker ONNX,1.0006520000752062,≤ 50 ms
