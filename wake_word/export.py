@@ -53,13 +53,23 @@ def export(cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml") -> None:
         input_names=["mel_input"],
         output_names=["logits"],
         dynamic_axes={"mel_input": {0: "batch_size"}},
-        opset_version=17,
+        opset_version=15,
         export_params=True,
+        dynamo=False,
     )
     onnx.checker.check_model(str(fp32_path))
     print(f"[Export] Float32 ONNX saved → {fp32_path}")
 
     # ── INT8 Static Quantization ───────────────────────────────────────────
+    class QuantWrapper(torch.nn.Module):
+        def __init__(self, m):
+            super().__init__()
+            self.quant = quant.QuantStub()
+            self.model = m
+            self.dequant = quant.DeQuantStub()
+        def forward(self, x):
+            return self.dequant(self.model(self.quant(x)))
+
     model_q = WakeWordCNN(num_classes=num_classes)
     model_q.load_state_dict(ckpt["model_state"])
     model_q.eval()
@@ -69,10 +79,15 @@ def export(cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml") -> None:
         model_q,
         [
             ["input_conv.0", "input_conv.1", "input_conv.2"],
+            ["block1.0.pw_conv", "block1.0.bn", "block1.0.relu"],
+            ["block2.0.pw_conv", "block2.0.bn", "block2.0.relu"],
+            ["block3.0.pw_conv", "block3.0.bn", "block3.0.relu"],
         ],
         inplace=False,
     )
-    model_q.qconfig = quant.get_default_qconfig("fbgemm")
+    model_q = QuantWrapper(model_q)
+    torch.backends.quantized.engine = 'onednn'
+    model_q.qconfig = quant.get_default_qconfig("onednn")
     quant.prepare(model_q, inplace=True)
 
     # Calibration with random data (replace with real calibration data for best results)
@@ -91,8 +106,9 @@ def export(cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml") -> None:
         input_names=["mel_input"],
         output_names=["logits"],
         dynamic_axes={"mel_input": {0: "batch_size"}},
-        opset_version=17,
+        opset_version=15,
         export_params=True,
+        dynamo=False,
     )
     print(f"[Export] INT8 ONNX saved → {onnx_path}")
 

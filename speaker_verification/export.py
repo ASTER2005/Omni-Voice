@@ -33,8 +33,9 @@ def export(cfg_path="C:/Omni_Voice/pipeline/config.yaml"):
         input_names=["mel_input"],
         output_names=["embedding"],
         dynamic_axes={"mel_input": {0: "batch_size"}},
-        opset_version=17,
+        opset_version=15,
         export_params=True,
+        dynamo=False,
     )
     onnx.checker.check_model(str(onnx_path))
     print(f"[Export] Speaker ONNX saved → {onnx_path}")
