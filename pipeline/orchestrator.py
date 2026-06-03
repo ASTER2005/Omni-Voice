@@ -47,7 +47,7 @@ class OmniVoicePipeline:
         pipe.run(on_accept=lambda spk: print(f"Welcome {spk}!"))
     """
 
-    def __init__(self, cfg_path="C:/Omni_Voice/pipeline/config.yaml"):
+    def __init__(self, cfg_path="C:/Omni_Voice/pipeline/config.yaml", use_onnx_speaker: bool = False):
         self.cfg_path = cfg_path
         cfg = _load_cfg(cfg_path)
         self.ww_cfg = cfg["wake_word"]
@@ -71,7 +71,7 @@ class OmniVoicePipeline:
         self.vad      = SileroVAD(cfg_path)
         self.nr       = NoiseReducer(cfg_path)
         self.fe       = FeatureExtractor(cfg_path)
-        self.verifier = SpeakerVerifier(cfg_path)
+        self.verifier = SpeakerVerifier(cfg_path, use_onnx=use_onnx_speaker)
 
         # ONNX wake word session (loaded lazily)
         self._ww_session: Optional[ort.InferenceSession] = None
@@ -214,6 +214,7 @@ if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
     p.add_argument("--config", default="C:/Omni_Voice/pipeline/config.yaml")
+    p.add_argument("--onnx-speaker", action="store_true", help="Use ONNX model for speaker verification")
     args = p.parse_args()
 
     def on_accept(spk_id, score):
@@ -222,5 +223,5 @@ if __name__ == "__main__":
     def on_reject(score):
         print(f"\n  🔴 Access DENIED   (score={score:.4f})\n")
 
-    pipe = OmniVoicePipeline(cfg_path=args.config)
+    pipe = OmniVoicePipeline(cfg_path=args.config, use_onnx_speaker=args.onnx_speaker)
     pipe.run(on_accept=on_accept, on_reject=on_reject)

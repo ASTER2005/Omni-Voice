@@ -32,7 +32,7 @@ def _pad_mel(mel, max_frames=300):
     return np.pad(mel, ((0,0),(0, max_frames - mel.shape[1])))
 
 
-def _embed_all(split, cfg_path, encoder, device, max_per_spk=5):
+def _embed_all(split, cfg_path, encoder, device, backend="resnet18", max_per_spk=5):
     cfg = _load_cfg(cfg_path)
     fe = FeatureExtractor(cfg_path)
     nr = NoiseReducer(cfg_path)
@@ -47,10 +47,15 @@ def _embed_all(split, cfg_path, encoder, device, max_per_spk=5):
                 audio, _ = sf.read(fpath, dtype="float32")
                 if audio.ndim > 1: audio = audio[:,0]
                 audio = nr.process(audio)
-                mel = _pad_mel(fe.mel_speaker(audio))
-                t = torch.from_numpy(mel).unsqueeze(0).unsqueeze(0).to(device)
-                with torch.no_grad():
-                    emb = encoder(t).squeeze(0).cpu().numpy()
+                if backend == "ecapa":
+                    t = torch.from_numpy(audio).float().unsqueeze(0).to(device)
+                    with torch.no_grad():
+                        emb = encoder(t).squeeze(0).cpu().numpy()
+                else: # resnet18
+                    mel = _pad_mel(fe.mel_speaker(audio))
+                    t = torch.from_numpy(mel).unsqueeze(0).unsqueeze(0).to(device)
+                    with torch.no_grad():
+                        emb = encoder(t).squeeze(0).cpu().numpy()
                 embs.append(emb / (np.linalg.norm(emb) + 1e-9))
             except Exception:
                 continue
@@ -61,16 +66,24 @@ def _embed_all(split, cfg_path, encoder, device, max_per_spk=5):
 
 def evaluate(cfg_path="C:/Omni_Voice/pipeline/config.yaml", model_path=None):
     cfg = _load_cfg(cfg_path)
-    model_path = model_path or cfg["speaker_verification"]["model_path"]
+    sp_cfg = cfg["speaker_verification"]
+    backend = sp_cfg.get("model_backend", "resnet18")
     device = torch.device("cpu")
 
-    ckpt = torch.load(model_path, map_location=device)
-    encoder = ResNet18SpeakerEncoder(embedding_dim=cfg["speaker_verification"]["embedding_dim"])
-    encoder.load_state_dict(ckpt["encoder_state"])
-    encoder.eval()
-    print(f"[SpeakerEval] Loaded {model_path}")
+    from speaker_verification.model import build_speaker_model
+    encoder = build_speaker_model(backend=backend, device=str(device))
 
-    spk_embs = _embed_all(cfg["dataset"]["test_split"], cfg_path, encoder, device)
+    if backend == "resnet18":
+        model_path = model_path or sp_cfg["model_path"]
+        ckpt = torch.load(model_path, map_location=device)
+        encoder.load_state_dict(ckpt["encoder_state"])
+        print(f"[SpeakerEval] Loaded custom ResNet-18 checkpoint: {model_path}")
+    else:
+        print(f"[SpeakerEval] Loaded pre-trained {backend} encoder.")
+
+    encoder.eval()
+
+    spk_embs = _embed_all(cfg["dataset"]["test_split"], cfg_path, encoder, device, backend=backend)
     spk_ids = list(spk_embs.keys())
 
     scores, labels = [], []

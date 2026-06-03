@@ -48,7 +48,7 @@ speaker_verification:
   onnx_path:     "C:/Omni_Voice/models/speaker_ecapa.onnx"
   enrolled_dir:  "C:/Omni_Voice/enrolled_speakers"
   embedding_dim: 192
-  threshold:     0.25                 # ECAPA-TDNN cosine threshold (lower than ResNet-18)
+  threshold:     0.55                 # ECAPA-TDNN cosine threshold (optimal for short live utterances)
   enroll_utterances: 7
   enroll_duration_s: 4.0
   n_mels: 80

@@ -13,6 +13,7 @@ import yaml
 import numpy as np
 import torch
 import torch.nn.functional as F
+import onnxruntime as ort
 from pathlib import Path
 from typing import Dict, Tuple, Optional
 
@@ -22,7 +23,7 @@ from preprocessing.audio_capture import AudioCapture
 from preprocessing.vad import SileroVAD
 from preprocessing.noise_reduction import NoiseReducer
 from preprocessing.feature_extraction import FeatureExtractor
-from speaker_verification.model import ResNet18SpeakerEncoder
+from speaker_verification.model import build_speaker_model
 
 
 def _load_cfg(cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml") -> dict:
@@ -44,37 +45,54 @@ class SpeakerVerifier:
     Verifies live mic audio against enrolled speakers.
     """
 
-    def __init__(self, cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml"):
+    def __init__(self, cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml", use_onnx: bool = False):
         self.cfg_path = cfg_path
         cfg = _load_cfg(cfg_path)
         self.sp_cfg = cfg["speaker_verification"]
         self.threshold: float = self.sp_cfg["threshold"]
         self.enrolled_dir = Path(self.sp_cfg["enrolled_dir"])
         self.device = torch.device("cpu")
+        self.backend: str = self.sp_cfg.get("model_backend", "resnet18")
+        self.use_onnx = use_onnx
 
         self.fe = FeatureExtractor(cfg_path)
         self.nr = NoiseReducer(cfg_path)
         self.vad = SileroVAD(cfg_path)
 
-        # Load encoder
-        self.encoder = self._load_encoder(cfg)
+        # Load encoder / ONNX session
+        self.onnx_session = None
+        self.encoder = None
+        if self.use_onnx:
+            self.onnx_session = self._load_onnx_session(cfg)
+        else:
+            self.encoder = self._load_encoder(cfg)
 
         # Load all enrolled embeddings
         self.enrolled: Dict[str, np.ndarray] = {}
         self.reload_enrolled()
 
-    def _load_encoder(self, cfg: dict) -> ResNet18SpeakerEncoder:
-        emb_dim = self.sp_cfg["embedding_dim"]
-        encoder = ResNet18SpeakerEncoder(embedding_dim=emb_dim).to(self.device)
-        model_path = Path(self.sp_cfg["model_path"])
-        if model_path.exists():
-            ckpt = torch.load(str(model_path), map_location=self.device)
-            encoder.load_state_dict(ckpt["encoder_state"])
-            print(f"[Verifier] Encoder loaded from {model_path}")
+    def _load_encoder(self, cfg: dict):
+        encoder = build_speaker_model(backend=self.backend, device=str(self.device))
+        if self.backend == "resnet18":
+            model_path = Path(self.sp_cfg["model_path"])
+            if model_path.exists():
+                ckpt = torch.load(str(model_path), map_location=self.device)
+                encoder.load_state_dict(ckpt["encoder_state"])
+                print(f"[Verifier] Encoder loaded from {model_path}")
+            else:
+                print("[Verifier] ⚠  No trained encoder found. Using random weights.")
         else:
-            print("[Verifier] ⚠  No trained encoder found. Using random weights.")
+            print(f"[Verifier] Loaded pre-trained {self.backend} encoder.")
         encoder.eval()
         return encoder
+
+    def _load_onnx_session(self, cfg: dict) -> ort.InferenceSession:
+        onnx_path = Path(self.sp_cfg["onnx_path"])
+        if onnx_path.exists():
+            print(f"[Verifier] Loading ONNX session from {onnx_path}")
+            return ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
+        else:
+            raise FileNotFoundError(f"[Verifier] Speaker ONNX not found at {onnx_path}. Run speaker_verification/export.py first.")
 
     def reload_enrolled(self) -> None:
         """Reload enrolled speaker embeddings from disk."""
@@ -91,11 +109,21 @@ class SpeakerVerifier:
     # ── Core embedding ──────────────────────────────────────────────────────
     def embed(self, audio: np.ndarray) -> np.ndarray:
         """Convert raw audio to L2-normalised speaker embedding."""
-        mel = self.fe.mel_speaker(audio)
-        mel = _pad_mel(mel, 300)
-        t = torch.from_numpy(mel).unsqueeze(0).unsqueeze(0).to(self.device)
-        with torch.no_grad():
-            emb = self.encoder(t).squeeze(0).cpu().numpy()
+        if self.use_onnx:
+            mel = self.fe.mel_speaker(audio)
+            mel = _pad_mel(mel, 300)
+            inp = mel[np.newaxis, np.newaxis].astype(np.float32)
+            emb = self.onnx_session.run(None, {"mel_input": inp})[0].squeeze(0)
+        elif self.backend == "ecapa":
+            t = torch.from_numpy(audio).float().unsqueeze(0).to(self.device)
+            with torch.no_grad():
+                emb = self.encoder(t).squeeze(0).cpu().numpy()
+        else: # resnet18
+            mel = self.fe.mel_speaker(audio)
+            mel = _pad_mel(mel, 300)
+            t = torch.from_numpy(mel).unsqueeze(0).unsqueeze(0).to(self.device)
+            with torch.no_grad():
+                emb = self.encoder(t).squeeze(0).cpu().numpy()
         return emb / (np.linalg.norm(emb) + 1e-9)
 
     # ── Cosine similarity ───────────────────────────────────────────────────
@@ -151,6 +179,7 @@ class SpeakerVerifier:
 
         audio = capture.read_seconds(duration_s)
         audio = self.nr.process(audio)
+        audio = self.vad.extract_speech(audio)
         self.vad.reset_states()
 
         emb = self.embed(audio)
@@ -185,6 +214,7 @@ class SpeakerVerifier:
 
         audio = capture.read_seconds(duration_s)
         audio = self.nr.process(audio)
+        audio = self.vad.extract_speech(audio)
         self.vad.reset_states()
 
         emb = self.embed(audio)
@@ -204,8 +234,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--id",     required=True, help="Enrolled speaker ID to verify")
     parser.add_argument("--config", default="C:/Omni_Voice/pipeline/config.yaml")
+    parser.add_argument("--onnx",   action="store_true", help="Use ONNX model for verification")
     args = parser.parse_args()
 
-    verifier = SpeakerVerifier(args.config)
+    verifier = SpeakerVerifier(args.config, use_onnx=args.onnx)
     with AudioCapture(args.config) as cap:
         accepted, score = verifier.verify_live(args.id, cap)

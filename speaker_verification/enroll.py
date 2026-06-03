@@ -23,7 +23,7 @@ from preprocessing.audio_capture import AudioCapture
 from preprocessing.vad import SileroVAD
 from preprocessing.noise_reduction import NoiseReducer
 from preprocessing.feature_extraction import FeatureExtractor
-from speaker_verification.model import ResNet18SpeakerEncoder
+from speaker_verification.model import build_speaker_model
 
 
 def _load_cfg(cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml") -> dict:
@@ -31,20 +31,22 @@ def _load_cfg(cfg_path: str = "C:/Omni_Voice/pipeline/config.yaml") -> dict:
         return yaml.safe_load(f)
 
 
-def _load_encoder(cfg: dict, device: torch.device) -> ResNet18SpeakerEncoder:
+def _load_encoder(cfg: dict, device: torch.device):
     """Load the trained speaker encoder from checkpoint."""
-    model_path = cfg["speaker_verification"]["model_path"]
-    emb_dim = cfg["speaker_verification"]["embedding_dim"]
+    backend = cfg["speaker_verification"].get("model_backend", "resnet18")
+    encoder = build_speaker_model(backend=backend, device=str(device))
 
-    encoder = ResNet18SpeakerEncoder(embedding_dim=emb_dim).to(device)
-
-    if Path(model_path).exists():
-        ckpt = torch.load(model_path, map_location=device)
-        encoder.load_state_dict(ckpt["encoder_state"])
-        print(f"[Enroll] Loaded encoder from {model_path}")
+    if backend == "resnet18":
+        model_path = cfg["speaker_verification"]["model_path"]
+        if Path(model_path).exists():
+            ckpt = torch.load(model_path, map_location=device)
+            encoder.load_state_dict(ckpt["encoder_state"])
+            print(f"[Enroll] Loaded encoder from {model_path}")
+        else:
+            print(f"[Enroll] ⚠  No trained model at {model_path}. "
+                  f"Using random weights (train the model first).")
     else:
-        print(f"[Enroll] ⚠  No trained model at {model_path}. "
-              f"Using random weights (train the model first).")
+        print(f"[Enroll] Loaded pre-trained {backend} encoder.")
 
     encoder.eval()
     return encoder
@@ -75,22 +77,29 @@ def capture_utterance(
     # Capture full utterance
     audio = capture.read_seconds(duration_s)
     audio = nr.process(audio)
+    audio = vad.extract_speech(audio)
     vad.reset_states()
     return audio
 
 
 def embed_audio(
     audio: np.ndarray,
-    encoder: ResNet18SpeakerEncoder,
+    encoder,
     fe: FeatureExtractor,
     device: torch.device,
+    backend: str = "resnet18",
 ) -> np.ndarray:
     """Convert raw audio to L2-normalised embedding."""
-    mel = fe.mel_speaker(audio)                         # [80, T]
-    mel = fe.FeatureExtractor._pad_or_clip if False else _pad_mel(mel, 300)
-    tensor = torch.from_numpy(mel).unsqueeze(0).unsqueeze(0).to(device)  # [1,1,80,T]
-    with torch.no_grad():
-        emb = encoder(tensor)                           # [1, D]
+    if backend == "ecapa":
+        tensor = torch.from_numpy(audio).float().unsqueeze(0).to(device)
+        with torch.no_grad():
+            emb = encoder(tensor)
+    else: # resnet18
+        mel = fe.mel_speaker(audio)                         # [80, T]
+        mel = _pad_mel(mel, 300)
+        tensor = torch.from_numpy(mel).unsqueeze(0).unsqueeze(0).to(device)  # [1,1,80,T]
+        with torch.no_grad():
+            emb = encoder(tensor)                           # [1, D]
     return emb.squeeze(0).cpu().numpy()                 # [D]
 
 
@@ -130,12 +139,13 @@ def enroll(
     print(f"{'='*55}")
     time.sleep(1)
 
+    backend = sp_cfg.get("model_backend", "resnet18")
     embeddings: List[np.ndarray] = []
 
     with AudioCapture(cfg_path) as capture:
         for i in range(1, K + 1):
             audio = capture_utterance(capture, vad, nr, dur, i)
-            emb = embed_audio(audio, encoder, fe, device)
+            emb = embed_audio(audio, encoder, fe, device, backend=backend)
             embeddings.append(emb)
             print(f"  ✓ Utterance {i}/{K} encoded | emb norm={np.linalg.norm(emb):.4f}")
             time.sleep(0.5)
