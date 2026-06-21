@@ -196,14 +196,14 @@ pytest tests/ -v
 
 ## 📂 Dataset
 
-The full dataset is hosted externally due to size limitations.﻿The dataset is hosted on Kaggle due to large size (25GB).
+The full dataset is hosted externally due to size limitations.﻿
+The dataset is hosted on Kaggle due to large size (25GB).
  
 **LibriSpeech ASR Corpus**
 
-Dataset Link:🔗 https://www.kaggle.com/datasets/pypiahmad/librispeech-asr-corpus
+Dataset Link:
+🔗 https://www.kaggle.com/datasets/pypiahmad/librispeech-asr-corpus
 
-
-https://www.kaggle.com/datasets/pypiahmad/librispeech-asr-corpus
 
 ### Recommended Splits
 
