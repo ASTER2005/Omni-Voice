@@ -89,3 +89,20 @@ logging:
   speaker_events_log: "C:/Omni_Voice/logs/speaker_events.log"
   pipeline_log:       "C:/Omni_Voice/logs/pipeline.log"
   level: INFO
+
+# ── ASR (Automatic Speech Recognition) ────────────────────────
+asr:
+  model_size:   base              # tiny | base | small | medium
+  language:     en                # language code; null = auto-detect
+  device:       cpu               # cpu | cuda
+  compute_type: int8              # int8 (fastest CPU) | float16 | float32
+  chunk_s:      5.0               # seconds of audio per Whisper inference
+  min_silence_s: 0.8              # silence gap that ends an utterance
+
+# ── TTS (Text-to-Speech) ──────────────────────────────────────
+tts:
+  backend: edge                   # edge (neural online) | pyttsx3 (offline)
+  voice:   en-IN-NeerjaNeural     # edge-tts voice; null = system default
+  # pyttsx3 fallback settings (used when backend = pyttsx3)
+  rate:    175                    # words per minute
+  volume:  1.0                    # 0.0 – 1.0

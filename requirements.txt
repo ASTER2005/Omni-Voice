@@ -29,6 +29,16 @@ matplotlib==3.9.0
 seaborn==0.13.2
 pandas==2.2.2
 
+# ── ASR (Automatic Speech Recognition) ────────────────────────────────────
+# faster-whisper = CTranslate2 backend (~4× faster than PyTorch on CPU)
+faster-whisper>=1.0.3
+# Fallback if faster-whisper is unavailable:
+# openai-whisper>=20240930
+
+# ── TTS (Text-to-Speech) ───────────────────────────────────────────────────
+edge-tts>=6.1.9            # Microsoft neural voices (online, high quality)
+pyttsx3>=2.90              # Offline system TTS (SAPI on Windows)
+
 # ── Utilities ──────────────────────────────────────────────────────────────
 pyyaml==6.0.1
 pytest==8.2.0
