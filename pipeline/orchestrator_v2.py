@@ -99,8 +99,10 @@ class OmniVoicePipelineV2:
         tts_voice: Optional[str] = None,
         tts_backend: Optional[str] = None,
         on_command: Optional[Callable[[str, str], Optional[str]]] = None,
+        skip_wake_word: bool = False,
     ):
         self.cfg_path = cfg_path
+        self.skip_wake_word = skip_wake_word
         cfg = _load_cfg(cfg_path)
         self.ww_cfg = cfg["wake_word"]
         self.sp_cfg = cfg["speaker_verification"]
@@ -246,23 +248,46 @@ class OmniVoicePipelineV2:
                     buffer[-chunk_size:] = chunk
                     audio_1s = self.nr.process(buffer.copy())
 
-                    # ── Step 3: Wake word ────────────────────────────────────
-                    self.state = State.WAKE_WORD
-                    triggered, ww_score = self._detect_wake_word(audio_1s)
-                    if not triggered:
+                    # ── Step 3: Wake word / Direct speech onset ──────────────
+                    if not self.skip_wake_word:
+                        self.state = State.WAKE_WORD
+                        triggered, ww_score = self._detect_wake_word(audio_1s)
+                        if not triggered:
+                            continue
+                        self.log.info(f"🎙  Wake word! (p={ww_score:.3f})")
+                    else:
+                        self.log.info(f"🎙  Speech detected (p={prob:.3f})")
+
+                    # ── Step 4: Collect complete utterance naturally ─────────
+                    self.state = State.VERIFICATION
+                    utterance_chunks = [chunk]
+                    silence_count = 0
+                    max_silence = 18        # ~540ms silence to signal end of utterance
+                    max_total_chunks = 250  # ~7.5 seconds max
+
+                    while len(utterance_chunks) < max_total_chunks:
+                        nxt_chunk = self.capture.read()
+                        is_voiced, _ = self.vad.is_speech(nxt_chunk)
+                        utterance_chunks.append(nxt_chunk)
+                        if is_voiced:
+                            silence_count = 0
+                        else:
+                            silence_count += 1
+                            if silence_count >= max_silence:
+                                break
+
+                    # Discard tiny clicks or pops under 240ms (8 chunks)
+                    if len(utterance_chunks) < 8:
                         continue
 
-                    self.log.info(f"🎙  Wake word! (p={ww_score:.3f})")
-
-                    # ── Step 4: Speaker verification ─────────────────────────
-                    self.state = State.VERIFICATION
+                    audio_utterance = np.concatenate(utterance_chunks, axis=0)
                     self.vad.reset_states()
-                    self.capture.flush()
 
-                    spk_id, spk_score = self.verifier.identify_live(
-                        self.capture,
-                        duration_s=self.sp_cfg["enroll_duration_s"],
-                    )
+                    # Clean audio and extract voice features for verification
+                    clean_audio = self.nr.process(audio_utterance)
+                    voiced_audio = self.vad.extract_speech(clean_audio)
+                    emb = self.verifier.embed(voiced_audio)
+                    spk_id, spk_score = self.verifier.identify_best_match(emb)
 
                     if spk_id is None:
                         # ── REJECTED ─────────────────────────────────────────
@@ -272,10 +297,11 @@ class OmniVoicePipelineV2:
                         )
                         if on_reject:
                             on_reject(spk_score)
-                        # Speak rejection
                         import random
                         deny_msg = random.choice(REJECTION_MSGS)
                         self.tts.say(deny_msg)
+                        self.capture.flush()
+                        self.vad.reset_states()
                         continue
 
                     # ── ACCEPTED ─────────────────────────────────────────────
@@ -286,38 +312,29 @@ class OmniVoicePipelineV2:
                     if on_accept:
                         on_accept(spk_id, spk_score)
 
-                    # ── Step 5: Greet speaker ────────────────────────────────
-                    greeting = self._greeting(spk_id)
-                    self.log.info(f"🔊 TTS: {greeting}")
-                    self.tts.say(greeting)
-
-                    # ── Step 6: Listen for command (ASR) ─────────────────────
+                    # ── Step 5: ASR (Transcribe what you just said) ───────────
                     self.state = State.ASR_LISTEN
-                    self.log.info("🎤 Listening for command...")
-                    self.capture.flush()
-                    self.vad.reset_states()
+                    command_text = self.asr.transcribe_once(audio_utterance)
 
-                    command_text = self._listen_for_command()
-
-                    if command_text:
+                    # ── Step 6: Generate reply & speak (TTS) ─────────────────
+                    self.state = State.TTS_RESPOND
+                    if command_text and len(command_text.strip()) > 1:
                         self.log.info(f"📝 Command: '{command_text}'")
-
-                        # ── Step 7: Handle command + TTS reply ───────────────
-                        self.state = State.TTS_RESPOND
-                        reply = None
-
                         if self.on_command:
                             reply = self.on_command(spk_id, command_text)
                         else:
-                            # Default echo response
                             reply = f"You said: {command_text}"
-
-                        if reply:
-                            self.log.info(f"🔊 Reply: {reply}")
-                            self.tts.say(reply)
                     else:
-                        self.log.info("No command detected.")
-                        self.tts.say("I didn't catch that. Please try again.")
+                        # Speaker verified, but said only a quick wake-up word
+                        reply = self._greeting(spk_id)
+
+                    if reply:
+                        self.log.info(f"🔊 Reply: {reply}")
+                        self.tts.say(reply)
+
+                    # Flush mic queue so AI doesn't listen to its own TTS output
+                    self.capture.flush()
+                    self.vad.reset_states()
 
                     sessions += 1
                     if max_sessions > 0 and sessions >= max_sessions:
@@ -397,22 +414,33 @@ if __name__ == "__main__":
     p.add_argument("--tts-voice",    default=None, help="TTS voice name")
     p.add_argument("--sessions",     type=int, default=0,
                    help="Number of sessions to run (0=infinite)")
+    p.add_argument("--skip-wake-word", action="store_true",
+                   help="Bypass wake-word detection and verify speaker immediately on speech")
     args = p.parse_args()
 
     # Example custom command handler
     def handle_command(speaker_id: str, text: str) -> Optional[str]:
         """Simple rule-based command handler. Replace with your LLM/NLP logic."""
         text_lower = text.lower()
-        if any(w in text_lower for w in ["time", "what time"]):
-            import datetime
-            now = datetime.datetime.now().strftime("%I:%M %p")
-            return f"The current time is {now}."
+        import datetime
+        now = datetime.datetime.now()
+
+        if any(w in text_lower for w in ["what time", "the time", "time now", "time is it"]):
+            return f"The time is {now.strftime('%I:%M %p')}."
+        elif any(w in text_lower for w in ["date", "today's date", "what day", "day is it"]):
+            return f"Today is {now.strftime('%A, %B %d, %Y')}."
+        elif any(w in text_lower for w in ["how are you", "how're you", "how do you do"]):
+            return f"I'm doing great, {speaker_id}! How are you doing today?"
+        elif any(w in text_lower for w in ["who are you", "your name", "what are you"]):
+            return f"I am OmniVoice, your edge voice assistant. You are authenticated as {speaker_id}."
+        elif any(w in text_lower for w in ["thank you", "thanks"]):
+            return f"You're very welcome, {speaker_id}!"
         elif any(w in text_lower for w in ["hello", "hi", "hey"]):
             return f"Hello {speaker_id}! Nice to hear from you."
-        elif any(w in text_lower for w in ["stop", "quit", "exit", "bye"]):
-            return "Goodbye! Have a great day."
+        elif any(w in text_lower for w in ["stop", "quit", "exit", "bye", "goodbye"]):
+            return f"Goodbye {speaker_id}! Have a wonderful day."
         else:
-            return f"I heard you say: {text}. I'm still learning to respond to that."
+            return f"I heard you say: {text}. Access granted for {speaker_id}."
 
     def on_accept(spk_id: str, score: float):
         print(f"\n  🟢 GRANTED → {spk_id}  (score={score:.4f})\n")
@@ -428,6 +456,7 @@ if __name__ == "__main__":
         tts_voice=args.tts_voice,
         tts_backend=args.tts_backend,
         on_command=handle_command,
+        skip_wake_word=args.skip_wake_word,
     )
     pipe.run(
         on_accept=on_accept,

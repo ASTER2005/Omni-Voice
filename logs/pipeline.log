@@ -6,3 +6,238 @@
 2026-06-03 10:21:04,299 [INFO] =======================================================
 2026-06-03 10:25:00,954 [INFO] Pipeline stopped by user (Ctrl+C).
 2026-06-03 10:25:00,954 [INFO] OmniVoice Pipeline STOPPED.
+2026-10-13 16:19:01,293 [INFO] Applied quirks (see `speechbrain.utils.quirks`): [disable_jit_profiling, allow_tf32]
+2026-10-13 16:19:01,294 [INFO] Excluded quirks specified by the `SB_DISABLE_QUIRKS` environment (comma-separated list): []
+2026-10-13 16:19:01,606 [INFO] Fetch hyperparams.yaml: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:19:02,329 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:19:02,330 [WARNING] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-10-13 16:19:02,363 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:19:02,640 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:19:02,679 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:19:02,877 [INFO] Fetch embedding_model.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:19:03,166 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:19:03,437 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:19:03,439 [INFO] Fetch mean_var_norm_emb.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:19:03,760 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:19:03,798 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:19:04,074 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:19:04,112 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:19:04,114 [INFO] Fetch classifier.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:19:04,375 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:19:04,720 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:19:04,723 [INFO] Fetch label_encoder.txt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:19:05,048 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:19:05,083 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:19:05,356 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:19:05,400 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:19:05,403 [INFO] Loading pretrained files for: embedding_model, mean_var_norm_emb, classifier, label_encoder
+2026-10-13 16:19:08,237 [INFO] HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-10-13 16:19:08,706 [INFO] Loading wake word ONNX: C:/Omni_Voice/models/wake_word_int8.onnx
+2026-10-13 16:19:08,867 [INFO] ============================================================
+2026-10-13 16:19:08,868 [INFO]   OmniVoice V2  (ASR + TTS Enabled)
+2026-10-13 16:19:08,868 [INFO]   Wake word:          ['omni']
+2026-10-13 16:19:08,869 [INFO]   Enrolled speakers:  ['Ankan']
+2026-10-13 16:19:08,869 [INFO]   ASR model:          Whisper faster
+2026-10-13 16:19:08,869 [INFO]   TTS backend:        edge
+2026-10-13 16:19:08,870 [INFO] ============================================================
+2026-10-13 16:19:08,870 [INFO]   Listening for wake word...
+2026-10-13 16:19:10,028 [INFO] 🎙  Speech detected (p=0.505) → Verifying speaker directly...
+2026-10-13 16:19:17,405 [WARNING] ✗ REJECTED | unknown speaker | score=0.5222
+2026-10-13 16:19:36,891 [INFO] Pipeline stopped by user (Ctrl+C).
+2026-10-13 16:19:36,891 [INFO] OmniVoice V2 Pipeline STOPPED.
+2026-10-13 16:25:06,381 [INFO] Applied quirks (see `speechbrain.utils.quirks`): [allow_tf32, disable_jit_profiling]
+2026-10-13 16:25:06,382 [INFO] Excluded quirks specified by the `SB_DISABLE_QUIRKS` environment (comma-separated list): []
+2026-10-13 16:25:06,515 [INFO] Fetch hyperparams.yaml: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:25:07,283 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:25:07,284 [WARNING] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-10-13 16:25:07,349 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:25:07,619 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:25:07,686 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:25:07,806 [INFO] Fetch embedding_model.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:25:08,067 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:25:08,406 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:25:08,408 [INFO] Fetch mean_var_norm_emb.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:25:08,718 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:25:08,790 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:25:09,053 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:25:09,116 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:25:09,118 [INFO] Fetch classifier.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:25:09,411 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:25:09,702 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:25:09,704 [INFO] Fetch label_encoder.txt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:25:09,952 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:25:10,023 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:25:10,322 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:25:10,387 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:25:10,389 [INFO] Loading pretrained files for: embedding_model, mean_var_norm_emb, classifier, label_encoder
+2026-10-13 16:25:12,747 [INFO] HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-10-13 16:25:13,285 [INFO] Loading wake word ONNX: C:/Omni_Voice/models/wake_word_int8.onnx
+2026-10-13 16:25:13,302 [INFO] ============================================================
+2026-10-13 16:25:13,302 [INFO]   OmniVoice V2  (ASR + TTS Enabled)
+2026-10-13 16:25:13,302 [INFO]   Wake word:          ['omni']
+2026-10-13 16:25:13,303 [INFO]   Enrolled speakers:  ['Ankan']
+2026-10-13 16:25:13,303 [INFO]   ASR model:          Whisper faster
+2026-10-13 16:25:13,303 [INFO]   TTS backend:        edge
+2026-10-13 16:25:13,304 [INFO] ============================================================
+2026-10-13 16:25:13,304 [INFO]   Listening for wake word...
+2026-10-13 16:25:17,482 [INFO] 🎙  Speech detected (p=0.967) → Verifying speaker directly...
+2026-10-13 16:25:21,923 [INFO] ✓ ACCEPTED | speaker='Ankan' | score=0.8391
+2026-10-13 16:25:21,923 [INFO] 🔊 TTS: Welcome back, Ankan! I'm listening.
+2026-10-13 16:25:28,339 [INFO] 🎤 Listening for command...
+2026-10-13 16:25:33,229 [INFO] Processing audio with duration 00:01.830
+2026-10-13 16:25:33,258 [INFO] VAD filter removed 00:00.318 of audio
+2026-10-13 16:25:33,982 [INFO] 📝 Command: 'What is the way that today?'
+2026-10-13 16:25:33,982 [INFO] 🔊 Reply: I heard you say: What is the way that today?. I'm still learning to respond to that.
+2026-10-13 16:25:45,294 [INFO] 🎙  Speech detected (p=0.707) → Verifying speaker directly...
+2026-10-13 16:25:49,569 [WARNING] ✗ REJECTED | unknown speaker | score=0.2823
+2026-10-13 16:25:57,089 [INFO] 🎙  Speech detected (p=0.625) → Verifying speaker directly...
+2026-10-13 16:25:57,132 [INFO] Pipeline stopped by user (Ctrl+C).
+2026-10-13 16:25:57,132 [INFO] OmniVoice V2 Pipeline STOPPED.
+2026-10-13 16:28:42,613 [INFO] Applied quirks (see `speechbrain.utils.quirks`): [allow_tf32, disable_jit_profiling]
+2026-10-13 16:28:42,614 [INFO] Excluded quirks specified by the `SB_DISABLE_QUIRKS` environment (comma-separated list): []
+2026-10-13 16:28:42,789 [INFO] Fetch hyperparams.yaml: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:28:43,504 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:28:43,504 [WARNING] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-10-13 16:28:43,574 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:28:43,845 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:28:43,913 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:28:44,034 [INFO] Fetch embedding_model.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:28:44,304 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:28:44,588 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:28:44,590 [INFO] Fetch mean_var_norm_emb.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:28:44,881 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:28:44,954 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:28:45,292 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:28:45,363 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:28:45,365 [INFO] Fetch classifier.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:28:45,681 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:28:45,962 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:28:45,965 [INFO] Fetch label_encoder.txt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:28:46,228 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:28:46,293 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:28:46,644 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:28:46,717 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:28:46,719 [INFO] Loading pretrained files for: embedding_model, mean_var_norm_emb, classifier, label_encoder
+2026-10-13 16:28:47,933 [INFO] HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-10-13 16:28:48,313 [INFO] Loading wake word ONNX: C:/Omni_Voice/models/wake_word_int8.onnx
+2026-10-13 16:28:48,329 [INFO] ============================================================
+2026-10-13 16:28:48,329 [INFO]   OmniVoice V2  (ASR + TTS Enabled)
+2026-10-13 16:28:48,329 [INFO]   Wake word:          ['omni']
+2026-10-13 16:28:48,330 [INFO]   Enrolled speakers:  ['Ankan']
+2026-10-13 16:28:48,330 [INFO]   ASR model:          Whisper faster
+2026-10-13 16:28:48,330 [INFO]   TTS backend:        edge
+2026-10-13 16:28:48,330 [INFO] ============================================================
+2026-10-13 16:28:48,331 [INFO]   Listening for wake word...
+2026-10-13 16:28:50,596 [INFO] 🎙  Speech detected (p=0.874) → Verifying speaker directly...
+2026-10-13 16:28:55,009 [WARNING] ✗ REJECTED | unknown speaker | score=0.3442
+2026-10-13 16:29:03,680 [INFO] 🎙  Speech detected (p=0.594) → Verifying speaker directly...
+2026-10-13 16:29:07,997 [WARNING] ✗ REJECTED | unknown speaker | score=0.1994
+2026-10-13 16:29:16,415 [INFO] 🎙  Speech detected (p=0.972) → Verifying speaker directly...
+2026-10-13 16:29:20,814 [INFO] ✓ ACCEPTED | speaker='Ankan' | score=0.6309
+2026-10-13 16:29:20,815 [INFO] 🔊 TTS: Welcome back, Ankan! I'm listening.
+2026-10-13 16:29:26,556 [INFO] 🎤 Listening for command...
+2026-10-13 16:29:30,230 [INFO] Processing audio with duration 00:01.560
+2026-10-13 16:29:30,238 [INFO] VAD filter removed 00:00.272 of audio
+2026-10-13 16:29:30,901 [INFO] 📝 Command: 'Hey, how are you?'
+2026-10-13 16:29:30,901 [INFO] 🔊 Reply: Hello Ankan! Nice to hear from you.
+2026-10-13 16:29:38,917 [INFO] 🎙  Speech detected (p=0.796) → Verifying speaker directly...
+2026-10-13 16:29:43,218 [WARNING] ✗ REJECTED | unknown speaker | score=0.1962
+2026-10-13 16:29:52,956 [INFO] 🎙  Speech detected (p=0.946) → Verifying speaker directly...
+2026-10-13 16:29:57,382 [WARNING] ✗ REJECTED | unknown speaker | score=0.5221
+2026-10-13 16:30:03,647 [INFO] Pipeline stopped by user (Ctrl+C).
+2026-10-13 16:30:03,647 [INFO] OmniVoice V2 Pipeline STOPPED.
+2026-10-13 16:40:43,194 [INFO] Applied quirks (see `speechbrain.utils.quirks`): [disable_jit_profiling, allow_tf32]
+2026-10-13 16:40:43,194 [INFO] Excluded quirks specified by the `SB_DISABLE_QUIRKS` environment (comma-separated list): []
+2026-10-13 16:40:43,337 [INFO] Fetch hyperparams.yaml: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:40:44,027 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:40:44,027 [WARNING] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-10-13 16:40:44,092 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:40:44,363 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/hyperparams.yaml "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:40:44,434 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml "HTTP/1.1 200 OK"
+2026-10-13 16:40:44,562 [INFO] Fetch embedding_model.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:40:44,819 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:40:45,107 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/embedding_model.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:40:45,109 [INFO] Fetch mean_var_norm_emb.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:40:45,380 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:40:45,452 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:40:45,711 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/mean_var_norm_emb.ckpt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:40:45,781 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/mean_var_norm_emb.ckpt "HTTP/1.1 200 OK"
+2026-10-13 16:40:45,783 [INFO] Fetch classifier.ckpt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:40:46,059 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:40:46,336 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/classifier.ckpt "HTTP/1.1 302 Found"
+2026-10-13 16:40:46,338 [INFO] Fetch label_encoder.txt: Fetching from HuggingFace Hub 'speechbrain/spkrec-ecapa-voxceleb' if not cached
+2026-10-13 16:40:46,605 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:40:46,681 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:40:46,952 [INFO] HTTP Request: HEAD https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/main/label_encoder.txt "HTTP/1.1 307 Temporary Redirect"
+2026-10-13 16:40:47,023 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/speechbrain/spkrec-ecapa-voxceleb/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/label_encoder.txt "HTTP/1.1 200 OK"
+2026-10-13 16:40:47,025 [INFO] Loading pretrained files for: embedding_model, mean_var_norm_emb, classifier, label_encoder
+2026-10-13 16:40:48,152 [INFO] HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-10-13 16:40:48,564 [INFO] Loading wake word ONNX: C:/Omni_Voice/models/wake_word_int8.onnx
+2026-10-13 16:40:48,659 [INFO] ============================================================
+2026-10-13 16:40:48,659 [INFO]   OmniVoice V2  (ASR + TTS Enabled)
+2026-10-13 16:40:48,659 [INFO]   Wake word:          ['omni']
+2026-10-13 16:40:48,660 [INFO]   Enrolled speakers:  ['Ankan']
+2026-10-13 16:40:48,660 [INFO]   ASR model:          Whisper faster
+2026-10-13 16:40:48,660 [INFO]   TTS backend:        edge
+2026-10-13 16:40:48,660 [INFO] ============================================================
+2026-10-13 16:40:48,660 [INFO]   Listening for wake word...
+2026-10-13 16:40:51,453 [INFO] 🎙  Speech detected (p=0.787)
+2026-10-13 16:40:52,585 [INFO] ✓ ACCEPTED | speaker='Ankan' | score=0.5803
+2026-10-13 16:40:52,585 [INFO] Processing audio with duration 00:00.930
+2026-10-13 16:40:52,599 [INFO] VAD filter removed 00:00.346 of audio
+2026-10-13 16:40:53,279 [INFO] 📝 Command: 'Hey!'
+2026-10-13 16:40:53,279 [INFO] 🔊 Reply: Hello Ankan! Nice to hear from you.
+2026-10-13 16:40:59,361 [INFO] 🎙  Speech detected (p=0.937)
+2026-10-13 16:41:02,365 [WARNING] ✗ REJECTED | unknown speaker | score=0.4188
+2026-10-13 16:41:10,175 [INFO] 🎙  Speech detected (p=0.772)
+2026-10-13 16:41:11,247 [INFO] ✓ ACCEPTED | speaker='Ankan' | score=0.5777
+2026-10-13 16:41:11,247 [INFO] Processing audio with duration 00:00.990
+2026-10-13 16:41:11,250 [INFO] VAD filter removed 00:00.342 of audio
+2026-10-13 16:41:11,875 [INFO] 📝 Command: 'Hey!'
+2026-10-13 16:41:11,875 [INFO] 🔊 Reply: Hello Ankan! Nice to hear from you.
+2026-10-13 16:41:18,840 [INFO] 🎙  Speech detected (p=0.716)
+2026-10-13 16:41:21,002 [WARNING] ✗ REJECTED | unknown speaker | score=0.2940
+2026-10-13 16:41:28,793 [INFO] 🎙  Speech detected (p=0.937)
+2026-10-13 16:41:29,731 [INFO] ✓ ACCEPTED | speaker='Ankan' | score=0.5427
+2026-10-13 16:41:29,732 [INFO] Processing audio with duration 00:00.870
+2026-10-13 16:41:29,735 [INFO] VAD filter removed 00:00.382 of audio
+2026-10-13 16:41:32,358 [INFO] 📝 Command: 'Yeah.'
+2026-10-13 16:41:32,358 [INFO] 🔊 Reply: I heard you say: Yeah.. I'm still learning to respond to that.
+2026-10-13 16:41:40,847 [INFO] 🎙  Speech detected (p=0.744)
+2026-10-13 16:41:41,018 [WARNING] ✗ REJECTED | unknown speaker | score=0.1798
+2026-10-13 16:41:48,305 [INFO] 🎙  Speech detected (p=0.838)
+2026-10-13 16:41:48,471 [WARNING] ✗ REJECTED | unknown speaker | score=0.1140
+2026-10-13 16:41:54,303 [INFO] 🎙  Speech detected (p=0.807)
+2026-10-13 16:41:54,516 [WARNING] ✗ REJECTED | unknown speaker | score=0.4379
+2026-10-13 16:42:00,842 [INFO] 🎙  Speech detected (p=0.915)
+2026-10-13 16:42:00,980 [WARNING] ✗ REJECTED | unknown speaker | score=0.2395
+2026-10-13 16:42:06,951 [INFO] 🎙  Speech detected (p=0.748)
+2026-10-13 16:42:07,098 [WARNING] ✗ REJECTED | unknown speaker | score=0.4637
+2026-10-13 16:42:14,113 [INFO] 🎙  Speech detected (p=0.861)
+2026-10-13 16:42:14,263 [WARNING] ✗ REJECTED | unknown speaker | score=0.4732
+2026-10-13 16:42:21,295 [INFO] 🎙  Speech detected (p=0.691)
+2026-10-13 16:42:21,453 [WARNING] ✗ REJECTED | unknown speaker | score=0.3260
+2026-10-13 16:42:27,371 [INFO] 🎙  Speech detected (p=0.813)
+2026-10-13 16:42:27,509 [WARNING] ✗ REJECTED | unknown speaker | score=0.1486
+2026-10-13 16:42:33,492 [INFO] 🎙  Speech detected (p=0.934)
+2026-10-13 16:42:33,661 [WARNING] ✗ REJECTED | unknown speaker | score=0.4677
+2026-10-13 16:42:39,752 [INFO] 🎙  Speech detected (p=0.899)
+2026-10-13 16:42:39,889 [WARNING] ✗ REJECTED | unknown speaker | score=0.4363
+2026-10-13 16:42:45,889 [INFO] 🎙  Speech detected (p=0.970)
+2026-10-13 16:42:46,019 [INFO] ✓ ACCEPTED | speaker='Ankan' | score=0.5780
+2026-10-13 16:42:46,020 [INFO] Processing audio with duration 00:00.870
+2026-10-13 16:42:46,022 [INFO] VAD filter removed 00:00.318 of audio
+2026-10-13 16:42:46,607 [INFO] 📝 Command: 'Hey!'
+2026-10-13 16:42:46,607 [INFO] 🔊 Reply: Hello Ankan! Nice to hear from you.
+2026-10-13 16:42:52,203 [INFO] 🎙  Speech detected (p=0.952)
+2026-10-13 16:42:52,333 [WARNING] ✗ REJECTED | unknown speaker | score=0.4772
+2026-10-13 16:42:58,125 [INFO] 🎙  Speech detected (p=0.860)
+2026-10-13 16:42:58,268 [WARNING] ✗ REJECTED | unknown speaker | score=0.1621
+2026-10-13 16:43:04,180 [INFO] 🎙  Speech detected (p=0.748)
+2026-10-13 16:43:04,328 [INFO] ✓ ACCEPTED | speaker='Ankan' | score=0.5274
+2026-10-13 16:43:04,328 [INFO] Processing audio with duration 00:01.050
+2026-10-13 16:43:04,331 [INFO] VAD filter removed 00:00.370 of audio
+2026-10-13 16:43:04,936 [INFO] 📝 Command: 'Hey!'
+2026-10-13 16:43:04,936 [INFO] 🔊 Reply: Hello Ankan! Nice to hear from you.
+2026-10-13 16:43:10,443 [INFO] Pipeline stopped by user (Ctrl+C).
+2026-10-13 16:43:10,443 [INFO] OmniVoice V2 Pipeline STOPPED.
