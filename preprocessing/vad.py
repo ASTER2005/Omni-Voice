@@ -106,17 +106,23 @@ class SileroVAD:
     ) -> np.ndarray:
         """
         Extract and concatenate all voiced segments from a waveform.
-        Fallback to original waveform if no speech is found or if the extracted
-        segment is less than 1.0 second (to ensure stable embeddings).
+        If extracted speech is under 1 second, repeats the voiced frames to reach
+        at least 1.0s so the speaker encoder receives pure vocal tract features
+        without background silence/noise pollution.
         """
         timestamps = self.get_speech_timestamps(waveform, sample_rate)
         if not timestamps:
-            return waveform   # fallback: return original if no speech found
+            return waveform   # fallback only if zero speech timestamps detected
         tensor = torch.from_numpy(waveform).float()
         speech = self._collect_chunks(timestamps, tensor)
         speech_np = speech.numpy()
-        if len(speech_np) < sample_rate:
-            return waveform   # fallback if extracted speech is too short (under 1s)
+        
+        # If speech is shorter than 1.0s (16000 samples), repeat it to reach 1.0s
+        # (standard practice for short utterances in ECAPA-TDNN)
+        if 0 < len(speech_np) < sample_rate:
+            repeats = int(np.ceil(sample_rate / len(speech_np)))
+            speech_np = np.tile(speech_np, repeats)[:sample_rate]
+            
         return speech_np
 
 
