@@ -118,7 +118,15 @@ class TTSSpeaker:
 
         with self._lock:
             if self._backend == "edge":
-                self._say_edge_sync(text)
+                try:
+                    self._say_edge_sync(text)
+                except Exception as e:
+                    print(f"\n[TTS] ⚠ edge-tts error ({type(e).__name__}: {e}).\n"
+                          f"[TTS] Falling back to offline system voice (pyttsx3)...")
+                    if self._engine is None:
+                        self._engine = self._init_pyttsx3(rate=175, volume=1.0)
+                    self._backend = "pyttsx3"
+                    self._say_pyttsx3(text)
             else:
                 self._say_pyttsx3(text)
 
