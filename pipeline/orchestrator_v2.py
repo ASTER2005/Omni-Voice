@@ -230,6 +230,12 @@ class OmniVoicePipelineV2:
         chunk_size = self.capture.chunk_samples  # 480
 
         with self.capture:
+            # ── Mic warm-up: flush device startup clicks / DC offset ───────────
+            time.sleep(0.3)
+            self.capture.flush()
+            self.vad.reset_states()
+            self.log.info("  Microphone ready. Speak anytime!")
+
             try:
                 while self._running:
                     self.state = State.IDLE
@@ -255,12 +261,11 @@ class OmniVoicePipelineV2:
                         if not triggered:
                             continue
                         self.log.info(f"🎙  Wake word! (p={ww_score:.3f})")
-                    else:
-                        self.log.info(f"🎙  Speech detected (p={prob:.3f})")
 
                     # ── Step 4: Collect complete utterance naturally ─────────
                     self.state = State.VERIFICATION
                     utterance_chunks = [chunk]
+                    voiced_chunks_count = 1
                     silence_count = 0
                     max_silence = 18        # ~540ms silence to signal end of utterance
                     max_total_chunks = 250  # ~7.5 seconds max
@@ -270,15 +275,21 @@ class OmniVoicePipelineV2:
                         is_voiced, _ = self.vad.is_speech(nxt_chunk)
                         utterance_chunks.append(nxt_chunk)
                         if is_voiced:
+                            voiced_chunks_count += 1
                             silence_count = 0
                         else:
                             silence_count += 1
                             if silence_count >= max_silence:
                                 break
 
-                    # Discard tiny clicks or pops under 240ms (8 chunks)
-                    if len(utterance_chunks) < 8:
+                    # Filter out isolated clicks, breaths, table taps:
+                    # Genuine human speech requires at least 6 voiced chunks (~180ms)
+                    # and total utterance length of at least 10 chunks (~300ms).
+                    if voiced_chunks_count < 6 or len(utterance_chunks) < 10:
                         continue
+
+                    if self.skip_wake_word:
+                        self.log.info(f"🎙  Speech detected (voiced_chunks={voiced_chunks_count}, total={len(utterance_chunks)})")
 
                     audio_utterance = np.concatenate(utterance_chunks, axis=0)
                     self.vad.reset_states()
